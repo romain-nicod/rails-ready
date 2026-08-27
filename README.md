@@ -1,5 +1,7 @@
 # rails-ready
 
+**Repository:** https://github.com/ai-gmented-pm/rails-ready (private)
+
 A Rails 8 application template that starts where a project actually starts —
 not where `rails new` leaves you.
 
@@ -72,7 +74,7 @@ it stays in.
 
 ```bash
 rails new -d postgresql \
-  -m https://raw.githubusercontent.com/OWNER/rails-ready/main/template.rb \
+  -m https://raw.githubusercontent.com/ai-gmented-pm/rails-ready/main/template.rb \
   my_app
 
 cd my_app

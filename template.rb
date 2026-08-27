@@ -4,7 +4,7 @@
 #  Run it at creation time:
 #
 #    rails new -d postgresql \
-#      -m https://raw.githubusercontent.com/OWNER/rails-ready/main/template.rb \
+#      -m https://raw.githubusercontent.com/ai-gmented-pm/rails-ready/main/template.rb \
 #      my_app
 #
 #  It is a GENERATOR, not a skeleton frozen in a repository -- which is why it
