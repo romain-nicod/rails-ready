@@ -1,0 +1,13 @@
+rails-ready
+Copyright (c) 2026 Romain Nicod
+
+This product is a derivative work of `minimal.rb` from lewagon/rails-templates
+(https://github.com/lewagon/rails-templates), Copyright 2017 Le Wagon, used
+under the MIT License. Roughly seventy percent of the executable lines of
+`template.rb` come from that file: the gem set, the Sprockets and Bootstrap
+wiring, the stylesheet layout and the Simple Form setup are Le Wagon's work.
+
+At generation time `template.rb` downloads lewagon/rails-stylesheets
+(https://github.com/lewagon/rails-stylesheets). That repository declares no
+licence, so its terms are undetermined. It is not redistributed here: the
+download happens on the user's machine.
