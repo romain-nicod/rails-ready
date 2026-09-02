@@ -1,6 +1,6 @@
 # rails-ready
 
-**Repository:** https://github.com/ai-gmented-pm/rails-ready (private)
+**Repository:** https://github.com/romain-nicod/rails-ready
 
 A Rails 8 application template that starts where a project actually starts —
 not where `rails new` leaves you.
@@ -74,7 +74,7 @@ it stays in.
 
 ```bash
 rails new -d postgresql \
-  -m https://raw.githubusercontent.com/ai-gmented-pm/rails-ready/main/template.rb \
+  -m https://raw.githubusercontent.com/romain-nicod/rails-ready/main/template.rb \
   my_app
 
 cd my_app
@@ -119,6 +119,30 @@ bundle exec bundler-audit check --update
 | [`template.rb`](template.rb) | The generator itself, commented |
 | [`Gemfile`](Gemfile) | Three tiers — active, optional, deliberately not picked |
 
-## Licence
+## Origin and licensing
 
-All rights reserved.
+This template is a **derivative work** of `minimal.rb` from
+[lewagon/rails-templates](https://github.com/lewagon/rails-templates), which is
+published under the MIT License. Roughly seventy percent of its executable
+lines come from that file: the gem set, the Sprockets and Bootstrap wiring, the
+stylesheet layout and the Simple Form setup are Le Wagon's work, not ours.
+
+What this repository adds is documented under *Structural decisions*: the
+dozen things a project installs by hand in week two, and four fixes for defects
+that cost time on every project.
+
+`rails-ready` is released under the **MIT License**. The original
+`Copyright 2017 Le Wagon` notice is reproduced in [LICENSE](LICENSE), as that
+licence requires.
+
+### One dependency you should know about
+
+At generation time the template downloads
+[lewagon/rails-stylesheets](https://github.com/lewagon/rails-stylesheets) over
+`curl`. **That repository declares no licence**, so its terms are undetermined.
+This template does not redistribute it: the download happens on your machine,
+and the choice to keep those stylesheets is yours. Remove the `Assets` section
+of `template.rb` if you would rather not depend on it.
+
+The Le Wagon UI Kit, referenced in the documentation, is likewise Le Wagon's
+work. See <https://uikit.lewagon.com/documentation>.
