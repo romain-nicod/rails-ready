@@ -131,9 +131,12 @@ What this repository adds is documented under *Structural decisions*: the
 dozen things a project installs by hand in week two, and four fixes for defects
 that cost time on every project.
 
-`rails-ready` is released under the **MIT License**. The original
-`Copyright 2017 Le Wagon` notice is reproduced in [LICENSE](LICENSE), as that
-licence requires.
+This repository's own contribution is released under **[CC BY 4.0](LICENSE)**:
+reuse it, adapt it, sell what you build with it, and keep the credit visible.
+
+Le Wagon's MIT terms attach to their material and continue to apply to it, so
+anyone reusing `template.rb` owes both. [`NOTICE`](NOTICE) states which is
+which.
 
 ### One dependency you should know about
 

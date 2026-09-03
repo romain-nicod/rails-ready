@@ -1,11 +1,36 @@
 rails-ready
 Copyright (c) 2026 Romain Nicod
 
-This product is a derivative work of `minimal.rb` from lewagon/rails-templates
-(https://github.com/lewagon/rails-templates), Copyright 2017 Le Wagon, used
-under the MIT License. Roughly seventy percent of the executable lines of
-`template.rb` come from that file: the gem set, the Sprockets and Bootstrap
-wiring, the stylesheet layout and the Simple Form setup are Le Wagon's work.
+This work is licensed under the Creative Commons Attribution 4.0
+International License. The full text is in LICENSE, and a summary is at
+https://creativecommons.org/licenses/by/4.0/
+
+You are free to share and adapt this material, including commercially,
+provided you give credit. Credit is satisfied by keeping a line such as:
+
+  Based on rails-ready by Romain Nicod
+  (https://github.com/romain-nicod/rails-ready), licensed under CC BY 4.0.
+
+Keep it where a reader will see it: in the README of the work that reuses
+this one, or in the file itself. A credit buried in a commit message does
+not satisfy the licence.
+
+If you modify this work, say so, so that nobody attributes your changes to
+the original.
+
+DERIVATIVE WORK, AND THE LICENCE THAT SURVIVES
+----------------------------------------------
+`template.rb` is a derivative work of `minimal.rb` from
+lewagon/rails-templates (https://github.com/lewagon/rails-templates),
+Copyright 2017 Le Wagon, used under the MIT License. Roughly seventy percent
+of its executable lines come from that file: the gem set, the Sprockets and
+Bootstrap wiring, the stylesheet layout and the Simple Form setup are
+Le Wagon's work.
+
+The MIT terms attach to that material and continue to apply to it. The
+CC BY 4.0 licence above covers this repository's own contribution. Anyone
+reusing `template.rb` therefore owes both: Le Wagon's MIT notice, and the
+attribution asked for here.
 
 At generation time `template.rb` downloads lewagon/rails-stylesheets
 (https://github.com/lewagon/rails-stylesheets). That repository declares no
