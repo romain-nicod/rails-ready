@@ -409,6 +409,53 @@ params.require(:article).permit(:title, :photo)      # has_one_attached
 params.require(:article).permit(:title, photos: [])  # has_many_attached
 ```
 
+### image_processing + ruby-vips — image variants
+
+Variants are **off** in a generated application: `rails new` writes an active
+`gem "image_processing"`, the template removes it, and
+`config.active_storage.variant_processor = :disabled` is set in
+`config/application.rb`. Nothing optional ships switched on — the same rule
+that keeps Devise out.
+
+Switching them on is four steps, and **skipping any one of them fails
+differently**:
+
+```ruby
+# Gemfile — BOTH lines. Since image_processing 2.0 the processor is a soft
+# dependency: the gem alone installs fine and produces nothing.
+gem "image_processing", "~> 2.0"
+gem "ruby-vips", "~> 2.0"
+```
+
+```ruby
+# config/application.rb — DELETE this line, do not edit it.
+# config.active_storage.variant_processor = :disabled
+```
+
+libvips is a system library, not a gem. It is needed on every machine **and on
+CI**:
+
+```bash
+brew install vips                                    # macOS
+sudo apt-get install -y libvips42                    # Debian, Ubuntu, CI
+```
+
+> 🔴 **Never pin `"~> 1.2"`**, which is what Rails 8.1's own generator writes.
+> **1.14.0 is the last 1.x release**: that line is frozen and will never carry
+> the hardening published in 2.0.x, which closed bypasses of CVE-2022-24720
+> (CVSS 9.8) reachable when an operation name comes from user input. Rails
+> `main` already generates `"~> 2.0"`.
+
+> ⚠️ **Rails 8.1.4 or newer is required** if `image_processing` 2.x is
+> installed without a processor. Before 8.1.4, Active Storage's guard did not
+> recognise the new `LoadError` — `ImageProcessing::Vips requires the ruby-vips
+> gem` matches neither of the two patterns it rescues — so it re-raised and the
+> application **did not boot**. 8.1.4 warns instead. Measured, not inferred.
+
+Why vips and not `mini_magick`: it is Rails' own default from
+`load_defaults 7.0` onwards, and it is faster on less memory. Pick
+`mini_magick` only for a format vips cannot read.
+
 ---
 
 ## 4. Verifying the template itself

@@ -56,6 +56,12 @@ inject_into_file "Gemfile", before: "group :development, :test do" do
     # gem "ruby_llm", "~> 1.2"      # talk to a language model
     # gem "neighbor"                # vector search for RAG (needs pgvector)
     # gem "cloudinary"              # image hosting and transformation
+    #
+    # Image variants. BOTH lines, and libvips on the machine and on CI:
+    # since image_processing 2.0 the processor is a soft dependency, so the
+    # gem alone boots into a warning and produces nothing.
+    # gem "image_processing", "~> 2.0"
+    # gem "ruby-vips", "~> 2.0"
 
   RUBY
 end
@@ -82,6 +88,26 @@ append_file "Gemfile", <<~RUBY
 RUBY
 
 gsub_file("Gemfile", /^gem "propshaft".*\n/, "")
+
+# Active Storage variants are OPTIONAL, and nothing optional ships switched
+# on -- the same rule that keeps Devise out. `rails new` disagrees: it writes
+# an active `gem "image_processing"` whenever Active Storage is not skipped,
+# and Rails 8.1 still pins "~> 1.2" -- a line frozen at 1.14.0 that will
+# never carry the hardening released in 2.0.x. So the line goes, and the two
+# that actually make variants work sit commented in the optional block above.
+gsub_file(
+  "Gemfile",
+  /^(?:# Use Active Storage variants.*\n)?^gem "image_processing".*\n/,
+  ""
+)
+
+# And say so if Rails ever writes it differently: a gsub_file that matches
+# nothing returns quietly, and a generator that fails quietly is the whole
+# reason this file exists.
+if File.read("Gemfile").match?(/^gem "image_processing"/)
+  say "  ! Could not remove the image_processing line from the Gemfile.", :red
+  say "    Remove it by hand, or keep it and add `gem \"ruby-vips\"`.", :red
+end
 
 # -----------------------------------------------------------------------------
 #  Stylesheets
@@ -142,6 +168,38 @@ RUBY
 # Background jobs run through Solid Queue. Without this line they execute
 # SYNCHRONOUSLY without warning.
 environment 'config.active_job.queue_adapter = :solid_queue'
+
+# Variants are off, and said so rather than left unset. Active Storage
+# defaults to :vips under load_defaults 7.0+; with no processor installed it
+# logs, at EVERY boot, 'add `gem "image_processing", "~> 1.2"`' -- pointing
+# at the dead 1.x line.
+#
+# This one CANNOT use `environment`, unlike every other setting above.
+# `environment` prepends to the top of the class body, which lands BEFORE
+# `config.load_defaults` -- and load_defaults then sets variant_processor to
+# :vips, overwriting it. The application boots with :vips and warns at every
+# start, while config/application.rb plainly reads :disabled. Measured on a
+# generated probe: it is why this is an inject_into_file and not a one-liner.
+# (`config.active_job.queue_adapter` above is safe: load_defaults does not
+# set it. Verified on the same probe.)
+if File.read("config/application.rb").match?(/config\.load_defaults/)
+  inject_into_file "config/application.rb",
+                   after: /^\s*config\.load_defaults.*\n/ do
+    <<-RUBY
+
+    # No image variants: nothing optional ships switched on. Left unset,
+    # Active Storage defaults to :vips, finds no processor, and warns at
+    # every boot. Switching variants on means DELETING this line and
+    # uncommenting image_processing AND ruby-vips in the Gemfile -- see
+    # docs/CONFIGURATION.md. Must stay AFTER load_defaults, which would
+    # otherwise overwrite it.
+    config.active_storage.variant_processor = :disabled
+    RUBY
+  end
+else
+  say "  ! config.load_defaults not found: variant_processor left unset.", :red
+  say "    Active Storage will warn at every boot. Set it by hand.", :red
+end
 
 # -----------------------------------------------------------------------------
 #  Puma -- one terminal, not two

@@ -126,7 +126,16 @@ gem "bootsnap", require: false
 #
 # gem "cloudinary"                  # storage plus transformation: crop, quality,
 #                                   # watermark, face-aware thumbnails
-# gem "image_processing", "~> 1.2"  # only for local variants
+#
+#  Local variants need BOTH lines plus libvips on the machine and on CI:
+#  since image_processing 2.0 the processor is a soft dependency, so the gem
+#  alone boots into a warning and produces nothing. And delete
+#  `config.active_storage.variant_processor = :disabled` rather than edit it.
+#  NEVER "~> 1.2", which is what `rails new` writes: 1.14.0 is the last 1.x
+#  release, so that line will never carry the hardening published in 2.0.x.
+#  Needs Rails >= 8.1.4 -- see docs/CONFIGURATION.md.
+# gem "image_processing", "~> 2.0"
+# gem "ruby-vips", "~> 2.0"
 
 # -----------------------------------------------------------------------------
 #  OPTIONAL — talking to a language model

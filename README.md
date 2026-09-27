@@ -56,9 +56,16 @@ patch releases. Generating it blind would produce a migration that silently
 does not match the gem. It takes three minutes by hand and it is the difference
 between one billed database and four.
 
-**Active Storage stays.** The bootcamp generates with `--skip-active-storage`
-and reinstalls it two lectures later. A template cannot contradict itself, so
-it stays in.
+**Active Storage stays, its variants do not.** The bootcamp generates with
+`--skip-active-storage` and reinstalls it two lectures later; a template cannot
+contradict itself, so Active Storage stays in. **Image variants are switched
+off**, because nothing optional ships switched on — the rule that keeps Devise
+out. `rails new` disagrees: it writes an active `gem "image_processing"` pinned
+`"~> 1.2"`, a line frozen at 1.14.0. The template removes it, sets
+`variant_processor = :disabled` so no warning fires at every boot, and
+[`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) carries the four steps to
+switch variants on — including libvips, which is a system library and not a
+gem.
 
 **Four deliberate departures from Le Wagon's `minimal.rb`**, each marked
 `DEPARTURE` in [`template.rb`](template.rb):
