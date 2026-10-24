@@ -165,9 +165,24 @@ environment <<~RUBY
 
 RUBY
 
-# Background jobs run through Solid Queue. Without this line they execute
-# SYNCHRONOUSLY without warning.
-environment 'config.active_job.queue_adapter = :solid_queue'
+# Background jobs: :async in development, Solid Queue in production.
+#
+# Rails 8.1 writes `config.active_job.queue_adapter = :solid_queue` (and
+# `config.solid_queue.connects_to`) into config/environments/production.rb
+# itself, so production needs nothing here. What this template used to add
+# was an application-wide :solid_queue in config/application.rb, and that
+# reached development too, where the queue tables do not exist (the primary
+# database holds db/schema.rb only): the Solid Queue supervisor then killed
+# Puma four seconds after boot (rails-ready#1).
+#
+# :async runs jobs on threads of the web process, needs no table and no
+# fork, and is Rails' own default; it loses queued jobs on a restart, which
+# a development server can afford. It is written out rather than left to the
+# default so that the choice is visible. `env:` injects one line at the top
+# of config/environments/development.rb, so `rails app:update` has a single
+# place to conflict on. Test keeps Rails' default. Do NOT add a production
+# line: Rails already wrote it, and a second one is a duplicate.
+environment 'config.active_job.queue_adapter = :async', env: "development"
 
 # Variants are off, and said so rather than left unset. Active Storage
 # defaults to :vips under load_defaults 7.0+; with no processor installed it
@@ -202,7 +217,7 @@ else
 end
 
 # -----------------------------------------------------------------------------
-#  Puma -- one terminal, not two
+#  Puma -- the job worker inside the web process, on request only
 # -----------------------------------------------------------------------------
 # Rails 8.1 already writes a Solid Queue line into config/puma.rb, gated on
 # SOLID_QUEUE_IN_PUMA. We REPLACE it rather than append our own: two
@@ -210,14 +225,16 @@ end
 #
 # Why not just set SOLID_QUEUE_IN_PUMA in .env? Because Puma reads this file
 # before Rails boots, so dotenv has not loaded yet -- the variable would be
-# empty exactly when it is read.
+# empty exactly when it is read. Export it in the shell instead.
 gsub_file "config/puma.rb",
   /^# Run the Solid Queue supervisor.*\nplugin :solid_queue if ENV\["SOLID_QUEUE_IN_PUMA"\]$/,
   <<~RUBY.strip
-    # Run the job worker inside the web process in development, so `rails s` is
-    # the only command you need. In production the worker gets its own process --
-    # see the Procfile. Set SOLID_QUEUE_IN_PUMA to force it on elsewhere.
-    if ENV.fetch("RAILS_ENV", "development") == "development" || ENV["SOLID_QUEUE_IN_PUMA"]
+    # Run the Solid Queue supervisor inside Puma only when asked:
+    # SOLID_QUEUE_IN_PUMA=1 (or true, yes; any case). Never from RAILS_ENV
+    # alone -- development runs Active Job on :async and has no queue tables.
+    # "0" and "false" leave it out: in Ruby both are truthy strings, which is
+    # why the value is parsed and not merely tested for presence.
+    if %w[1 true yes].include?(ENV["SOLID_QUEUE_IN_PUMA"].to_s.strip.downcase)
       plugin :solid_queue
     end
   RUBY
@@ -344,6 +361,6 @@ after_bundle do
 
   say "\n  Done. Next:", :green
   say "    bin/rails db:migrate"
-  say "    bin/dev            # or `rails s` -- jobs run in the same process"
+  say "    bin/dev            # or `rails s` -- jobs run in the same process (:async)"
   say "\n  Read docs/CONFIGURATION.md before deploying.\n", :green
 end

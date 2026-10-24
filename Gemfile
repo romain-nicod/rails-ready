@@ -69,8 +69,9 @@ gem "simple_form"                   # f.input picks the field type from the colu
 #      "Single database setup" — and do not skip the last step, removing
 #      `config.solid_queue.connects_to` from production.rb.
 #
-#  /!\ Without `config.active_job.queue_adapter = :solid_queue`, jobs run
-#      SYNCHRONOUSLY without warning. Everything appears to work.
+#  /!\ Solid Queue is the adapter in PRODUCTION only (Rails writes the line
+#      in production.rb). Development runs `:async`, which the template
+#      writes into development.rb: no queue tables there, so no manual step.
 #
 #  Not picked: Sidekiq. It is a fine library, but it needs Redis — one more
 #  service to run locally, deploy, monitor and pay for. The database is

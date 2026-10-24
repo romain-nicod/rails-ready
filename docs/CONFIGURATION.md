@@ -15,6 +15,9 @@ switch on each optional gem.
 
 ### Single database for Solid Queue, Cache and Cable
 
+This step is for **production**. Development needs none of it: it runs Active
+Job on `:async` (see "Jobs run asynchronously" in section 2).
+
 Rails 8 ships `solid_queue`, `solid_cache` and `solid_cable`. **Each defaults
 to its own database.** On a paid host that is four databases billed where one
 would do.
@@ -83,24 +86,43 @@ production:
 ### Jobs run asynchronously
 
 ```ruby
-# config/application.rb
+# config/environments/development.rb
+config.active_job.queue_adapter = :async
+
+# config/environments/production.rb (written by Rails itself)
 config.active_job.queue_adapter = :solid_queue
 ```
 
-> ⚠️ Without this line, jobs run **synchronously without warning**. Everything
-> appears to work and nothing is asynchronous.
+Development runs jobs on threads of the web process (`:async`): no table, no
+extra process, and **no manual step** — `rails s` and `bin/dev` work right
+after `rails db:migrate`. Queued jobs are lost when the server restarts, which
+a development server can afford. Production uses Solid Queue, whose tables are
+created by the single-database step of section 1.
 
-### One terminal in development, a worker in production
+> ⚠️ Solid Queue is **not** the adapter in development. Its tables live in the
+> `queue` database (or, after the single-database step, in a migration), not in
+> `db/schema.rb`; a Solid Queue supervisor started without them stops Puma
+> four seconds after boot
+> ([#1](https://github.com/romain-nicod/rails-ready/issues/1)). Mission Control
+> (below) reads Solid Queue, so in development it has nothing to show unless
+> you switch the adapter and create those tables yourself.
+
+### The job worker inside the web process, on request only
 
 ```ruby
 # config/puma.rb
-if ENV.fetch("RAILS_ENV", "development") == "development"
+if %w[1 true yes].include?(ENV["SOLID_QUEUE_IN_PUMA"].to_s.strip.downcase)
   plugin :solid_queue
 end
 ```
 
-`rails s` is the only command you need locally. In production the worker gets
-its own process, which is what the generated `Procfile` declares:
+The Solid Queue plugin loads **only** when `SOLID_QUEUE_IN_PUMA` is exported
+as `1`, `true` or `yes` (any case) — never from `RAILS_ENV`. `0`, `false`,
+empty and unset leave it out in every environment. Export it in the shell:
+Puma reads this file before `dotenv` has loaded `.env`.
+
+In production the worker normally gets its own process, which is what the
+generated `Procfile` declares:
 
 ```
 web: bundle exec puma -C config/puma.rb
