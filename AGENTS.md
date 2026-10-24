@@ -59,6 +59,14 @@ and warned at every start. Settings in that overlap use
 `config.active_job.queue_adapter` is safe — `load_defaults` does not set it,
 verified on the same probe — so do not move what already works.
 
+**Solid Queue is production only.** Rails 8.1 writes
+`config.active_job.queue_adapter = :solid_queue` into `production.rb` itself;
+the template adds only `:async` to `development.rb`. A `:solid_queue` in
+`config/application.rb` reaches development, where the queue tables do not
+exist, and the Puma plugin then kills the server four seconds after boot
+(#1). The plugin loads only on an explicit `SOLID_QUEUE_IN_PUMA` of `1`,
+`true` or `yes` — never from `RAILS_ENV`.
+
 ## Verifying a change
 
 The template cannot be unit-tested. It is verified by running it:
@@ -80,7 +88,9 @@ bin/rails runner 'puts ActiveStorage.variant_processor.inspect;
 grep -ci "image_processing" log/development.log   # expect 0
 ```
 
-Expected: `:disabled`, `ActiveJob::QueueAdapters::SolidQueueAdapter`, and `0`.
+Expected: `:disabled`, `ActiveJob::QueueAdapters::AsyncAdapter` (development;
+`SolidQueueAdapter` under `RAILS_ENV=production`), and `0`. Then start
+`bin/rails server` and poll `/up` for 35 seconds: every answer is 200.
 A setting is verified when the application reports it, never when the file
 contains it.
 

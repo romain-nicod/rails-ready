@@ -24,9 +24,9 @@ without accounts should not carry Devise.
 2. **It sets up the base**: Sprockets over Propshaft, the stylesheet
    architecture, Bootstrap wired through the importmap, Simple Form, a
    `pages#home` root.
-3. **It adds what the base leaves out**: Solid Queue configured to actually
-   run, the Puma plugin so `rails s` is the only command you need, Mission
-   Control, live reload, `dotenv`, Pry, `httplog`, Faker.
+3. **It adds what the base leaves out**: jobs that actually run
+   asynchronously (`:async` in development, Solid Queue in production), the
+   Solid Queue Puma plugin one environment variable away, Mission Control, live reload, `dotenv`, Pry, `httplog`, Faker.
 4. **It leaves the rest commented**, with pointers to
    [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md).
 5. **You read that document before deploying.** One step is deliberately not
@@ -103,7 +103,7 @@ rails new -d postgresql -m …/template.rb --skip .
 | Variable | Required | Used for |
 |---|---|---|
 | `DATABASE_URL` | in production | PostgreSQL connection |
-| `RAILS_ENV` | no | `development` unless set; gates the Puma job plugin |
+| `SOLID_QUEUE_IN_PUMA` | no | `1`, `true` or `yes` loads the Solid Queue Puma plugin; unset, `0` and `false` leave it out |
 | `OPENAI_API_KEY` | only with `ruby_llm` | language-model calls |
 | `CLOUDINARY_URL` | only with `cloudinary` | image hosting |
 
